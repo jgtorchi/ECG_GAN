@@ -5,7 +5,10 @@ function [lossGenerator, lossDiscriminator] = ganLoss(probReal, probGenerated)
 
 % Calculate losses for discriminator network
 lossGenerated = -mean(log(1 - probGenerated));
-lossReal = -mean(log(probReal));
+
+% multiplied probReal by 0.9 to implement
+% one-sided labeling
+lossReal = -mean(log(0.9*probReal));
 
 % Combine losses for discriminator network
 lossDiscriminator = lossReal + lossGenerated;

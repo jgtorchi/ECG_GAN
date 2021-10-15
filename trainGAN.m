@@ -23,15 +23,10 @@ lineScoreGenerator = animatedline(scoreAxes, 'Color', [0 0.447 0.741]);
 lineScoreDiscriminator = animatedline(scoreAxes, 'Color', [0.85 0.325 0.098]);
 legend('Generator', 'Discriminator');
 ylim([0 1])
-xlabel("Epoch")
+xlabel("Iteration")
 ylabel("Score")
 grid on
-% lossAxes = subplot(1,3,2);
-% lineLossGenerator = animatedline(lossAxes, 'Color', [0 0.447 0.741]);
-% lineLossDiscriminator = animatedline(lossAxes, 'Color', [0.85 0.325 0.098]);
-% legend('Generator', 'Discriminator');
-% xlabel("Epoch")
-% ylabel("Loss")
+
 %% Initialize parameters for Adam optimizer
 trailingAvgGenerator = [];
 trailingAvgSqGenerator = [];
@@ -98,13 +93,12 @@ for epoch = 1:numEpochs
         
         % Evaluate model gradients and generator state using
         % dlfeval and modelGradients functions
-        [gradientsGenerator, gradientsDiscriminator, stateGenerator, scoreGenerator, scoreDiscriminator, ...
-            ~,~] = ...
+        [gradientsGenerator, gradientsDiscriminator, stateGenerator, scoreGenerator, scoreDiscriminator,lossGenerator ,lossDiscriminator] = ...
             dlfeval(@modelGradients, dlnetGenerator, dlnetDiscriminator, dlX, dlT, dlZ);
         dlnetGenerator.State = stateGenerator;
         
         % Update discriminator network parameters
-        [dlnetDiscriminator, trailingAvgDiscriminator, trailingAvgSqDiscriminator,] = ...
+        [dlnetDiscriminator, trailingAvgDiscriminator, trailingAvgSqDiscriminator] = ...
             adamupdate(dlnetDiscriminator, gradientsDiscriminator, ...
             trailingAvgDiscriminator, trailingAvgSqDiscriminator, iteration, ...
             learnRate, gradientDecayFactor, squaredGradientDecayFactor);
@@ -137,20 +131,12 @@ for epoch = 1:numEpochs
         
         ct = ct+1;
     end
-    figure(1)
-%     subplot(1,3,2)
-%     addpoints(lineLossGenerator,epoch,...
-%         double(gather(extractdata(lossGenerator))));
-% 
-%     addpoints(lineLossDiscriminator,epoch,...
-%         double(gather(extractdata(lossDiscriminator))));
-    
     % Update scores plot
     subplot(1,2,2)
-    addpoints(lineScoreGenerator,epoch,...
+    addpoints(lineScoreGenerator,ct,...
         double(gather(extractdata(scoreGenerator))));
 
-    addpoints(lineScoreDiscriminator,epoch,...
+    addpoints(lineScoreDiscriminator,ct,...
         double(gather(extractdata(scoreDiscriminator))));
 
     % Update title with training progress information

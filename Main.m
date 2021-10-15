@@ -2,12 +2,22 @@
 clc
 close all
 clear
-Person(1).number = 1;
-Person(2).number = 2;
-Person(3).number = 32; % replace this person
-Person(4).number = 52;
-Person(5).number = 72;
 baseDir = 'ecg-id-database-1.0.0/Person_';
+% get number of recordings for each person
+numPersons = 90;
+numRecs = zeros(1,numPersons);
+for i = 1:90
+    fullPath = strcat(baseDir,sprintf( '%02d', i),'/');
+    recording = dir(fullfile(fullPath,'*.dat'));
+    numRecs(i) = numel(recording);
+end
+[sortedRecs,sortedIndxs] = sort(numRecs,'descend');
+
+numPersons = 10; %number of people's recodings to use
+for i = 1:numPersons
+    % get people with most number of recordings
+    Person(i).number = sortedIndxs(i);
+end
 for i = 1:length(Person)
     Person(i).path = strcat(baseDir,sprintf( '%02d', Person(i).number),'/');
 end
@@ -24,7 +34,7 @@ for i = 1:length(Person)
     numTesting = numTesting + Person(i).TestRecordings;
 end
 
-plotting = 0; % turn plotting on(1) or off(0)
+plotting = 1; % turn plotting on(1) or off(0)
 SamplesPerBeat = 500;
 TrainingFeatures = zeros(500, 1);
 TrainingLabels = zeros(1, 1);
@@ -35,11 +45,12 @@ for i = 1:length(Person)
         recordPath = fullfile(Person(i).path,Person(i).recordNames{j});
         [sig, Fs, tm] = rdsamp(recordPath, 2);
         if(plotting)
-            figure(1);
+            figure(1); 
             plot(tm,sig);
             title('ECG signal Before Filtering');
             xlabel('Time (sec)');
             ylabel('Voltage (mV)');
+            xlim([0 4])
         end
         sig = ApplyEcgFilters(sig);
         [qrs_amp_raw,qrs_i_raw,delay] = pan_tompkin(sig,Fs,0);
@@ -57,6 +68,7 @@ for i = 1:length(Person)
             xlabel('Time (sec)');
             ylabel('Voltage (mV)');
             hold off;
+            xlim([0 4])
         end
         for k = 2:length(Pidxs)
             heartbeat = sig(Pidxs(k-1):Pidxs(k));
@@ -71,7 +83,7 @@ for i = 1:length(Person)
                 ylabel('Voltage (mV)');
                 xlabel('Sample Number (n)');
                 str1 =  'Heartbeat before Resampling and Normalization';
-                str2 = sprintf('Person %d, Recording %d, Beat %d\n',i,j,k);
+                str2 = sprintf('Subject %d, Recording %d, Beat %d\n',Person(i).number,j,k);
                 title({str1;str2})
                 subplot(2,1,2)
                 plot(resampledBeat)

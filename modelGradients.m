@@ -1,5 +1,4 @@
-function [gradientsGenerator, gradientsDiscriminator, stateGenerator, scoreGenerator, scoreDiscriminator,...
-    lossGenerator,lossDiscriminator] = ...
+function [gradientsGenerator, gradientsDiscriminator, stateGenerator, scoreGenerator, scoreDiscriminator, lossGenerator, lossDiscriminator] = ...
     modelGradients(dlnetGenerator, dlnetDiscriminator, dlX, dlT, dlZ)
 %MODELGRADIENTS Compute the gradients for generator and discriminator.
 
@@ -10,6 +9,8 @@ dlYPred = forward(dlnetDiscriminator, dlX, dlT);
 
 % Calculate predictions for generated data with discriminator network
 [dlXGenerated,stateGenerator] = forward(dlnetGenerator, dlZ, dlT);
+% apply sigmoid activation function to outputs of generator
+%dlXGenerated = sigmoid(dlXGenerated); 
 dlYPredGenerated = forward(dlnetDiscriminator, dlXGenerated, dlT);
 
 % Calculate probabilities

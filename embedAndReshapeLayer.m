@@ -34,7 +34,7 @@ classdef embedAndReshapeLayer < nnet.layer.Layer
             layer.EmbeddingWeights = randn(embeddingDimension, inputDimension);
             
             % Initialize fully connected weights and bias
-            sz = outputSize(1) * outputSize(2);
+            sz = outputSize(1) * outputSize(2)*outputSize(3);
             layer.FullyConnectWeights = initializeGlorot(sz, embeddingDimension);
             layer.FullyConnectBias = zeros(sz, 1, 'single');
         end
@@ -64,7 +64,7 @@ classdef embedAndReshapeLayer < nnet.layer.Layer
             
             % Reshape
             sz = layer.OutputSize;
-            Z = reshape(X, sz(1), sz(2), 1, []);
+            Z = reshape(X, sz(1), sz(2), sz(3), []);
         end
         
         function Z = embedding(layer, X)
